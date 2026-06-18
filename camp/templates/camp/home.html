@@ -1,0 +1,174 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مخيم الأقصى — الصفحة الرئيسية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#345e40", second: "#97a483", dark: "#2e2e2e" },
+            fontFamily: { cairo: ["Cairo", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="{% static 'camp/css/style.css' %}" />
+  </head>
+  <body class="font-cairo">
+    {% include "camp/partials/_navbar.html" %}
+
+    <!-- ── 1. HERO CAROUSEL ─────────────────────────────────────────────────── -->
+    <section class="relative h-screen min-h-[600px] overflow-hidden">
+      {% for slide in hero_slides %}
+      <div class="bg-black hero-slide {% if forloop.first %}active{% endif %}">
+        <img src="{{ slide.image.url }}" alt="{{ slide.title }}"
+             class="absolute inset-0 opacity-60 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent"></div>
+        <div class="z-10 relative flex items-center mx-auto px-5 max-w-7xl h-full">
+          <div class="max-w-xl text-white fade-in-up">
+            {% if slide.tag %}
+            <span class="inline-block bg-white/20 backdrop-blur mb-4 px-3 py-1 border border-white/30 rounded-full font-semibold text-white text-xs">{{ slide.tag }}</span>
+            {% endif %}
+            <h1 class="mb-5 font-extrabold text-4xl md:text-5xl lg:text-6xl leading-tight">{{ slide.title }}</h1>
+            <p class="mb-8 text-white/80 text-base md:text-lg leading-relaxed">{{ slide.description }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <button id="hero-prev" class="top-1/2 right-4 z-20 absolute flex justify-center items-center bg-white/15 hover:bg-white/30 backdrop-blur rounded-full w-10 h-10 text-white transition-colors -translate-y-1/2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
+      </button>
+      <button id="hero-next" class="top-1/2 left-4 z-20 absolute flex justify-center items-center bg-white/15 hover:bg-white/30 backdrop-blur rounded-full w-10 h-10 text-white transition-colors -translate-y-1/2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6" /></svg>
+      </button>
+    </section>
+
+    <!-- ── 2. MISSION STRIP ─────────────────────────────────────────────────── -->
+    <section class="bg-white py-16">
+      <div class="mx-auto px-5 max-w-7xl">
+        <div class="mb-12 text-center">
+          <span class="font-semibold text-primary text-sm uppercase tracking-widest">من نحن</span>
+          <h2 class="mt-2 font-extrabold text-dark text-3xl md:text-4xl">قيمنا الأساسية</h2>
+        </div>
+        <div class="gap-6 grid md:grid-cols-3">
+          {% for val in mission_values %}
+          <div class="group hover:bg-gradient-to-br hover:from-primary/5 hover:to-second/10 p-7 border border-gray-100 hover:border-primary/20 rounded-2xl transition-all duration-300 service-card">
+            <span class="block mb-4 font-extrabold text-gray-200 group-hover:text-primary/15 text-5xl leading-none transition-colors">{{ val.number }}</span>
+            <h3 class="mb-3 font-bold text-dark text-xl">{{ val.title }}</h3>
+            <p class="text-gray-500 text-sm leading-relaxed">{{ val.desc }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 3. ISLAMIC QUOTE ─────────────────────────────────────────────────── -->
+    <section class="bg-[#f0f4ef] py-14">
+      <div class="mx-auto px-5 max-w-3xl text-center">
+        <span class="inline-block bg-primary/10 mb-5 px-3 py-1 rounded-full font-semibold text-primary text-xs">{{ islamic_quote.type }}</span>
+        <p class="mb-5 font-bold text-dark text-2xl md:text-3xl leading-loose">﴿ {{ islamic_quote.arabic }} ﴾</p>
+        <span class="font-medium text-gray-400 text-sm">— {{ islamic_quote.source }}</span>
+      </div>
+    </section>
+
+    <!-- ── 4. STATISTICS ────────────────────────────────────────────────────── -->
+    {% if statistics %}
+    <section class="bg-white py-16">
+      <div class="mx-auto px-5 max-w-7xl">
+        <div class="mb-12 text-center">
+          <span class="font-semibold text-primary text-sm uppercase tracking-widest">أرقام حقيقية</span>
+          <h2 class="mt-2 font-extrabold text-dark text-3xl md:text-4xl">أثرنا على أرض الواقع</h2>
+        </div>
+        <div class="gap-6 grid grid-cols-2 lg:grid-cols-4">
+          {% for stat in statistics %}
+          <div class="bg-white shadow-sm hover:shadow-md p-7 border border-gray-100 rounded-2xl text-center transition-shadow">
+            <div class="flex justify-center items-center bg-primary/10 mx-auto mb-4 rounded-full w-12 h-12">
+              {% if stat.icon_name == 'tent' %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+              {% elif stat.icon_name == 'smile' %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
+              {% elif stat.icon_name == 'users' %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>
+              {% elif stat.icon_name == 'hospital' %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="2" width="18" height="20" rx="2" /><line x1="12" y1="8" x2="12" y2="14" /><line x1="9" y1="11" x2="15" y2="11" /></svg>
+              {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /></svg>
+              {% endif %}
+            </div>
+            <div class="stat-value" data-count="{{ stat.value }}">+{{ stat.value }}</div>
+            <div class="mt-1 font-bold text-dark">{{ stat.label }}</div>
+            <div class="mt-1 text-gray-400 text-xs">{{ stat.description }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- ── 5. SERVICES ──────────────────────────────────────────────────────── -->
+    <section id="our-service" class="bg-[#f9f9f7] py-20">
+      <div class="mx-auto px-5 max-w-7xl">
+        <div class="mb-14 text-center">
+          <span class="font-semibold text-primary text-sm uppercase tracking-widest">ما نقدمه</span>
+          <h2 class="mt-2 font-extrabold text-dark text-3xl md:text-4xl">خدماتنا الإنسانية</h2>
+          <p class="mx-auto mt-3 max-w-xl text-gray-500">نوفر الدعم الشامل والكريم للعائلات النازحة لضمان حياة آمنة وكريمة في ظل الظروف الصعبة.</p>
+        </div>
+        {% if services %}
+        <div class="gap-5 grid sm:grid-cols-2 lg:grid-cols-4">
+          {% for service in services %}
+          <div class="group service-card-v2">
+            <div class="group-hover:bg-primary [&_svg]:w-7 [&_svg]:h-7 [&_svg]:group-hover:text-white [&_svg]:text-primary transition-colors [&_svg]:transition-colors duration-300 service-icon-wrap">
+              {{ service.icon_svg|safe }}
+            </div>
+            <h3 class="mt-5 mb-2 font-bold text-dark group-hover:text-primary text-base transition-colors">{{ service.title }}</h3>
+            <p class="text-gray-400 text-sm line-clamp-3 leading-relaxed">{{ service.description }}</p>
+            <div class="service-accent-line"></div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- ── 6. CTA BANNER ───────────────────────────────────────────────────── -->
+    <section class="relative py-20 overflow-hidden cta-banner">
+      <div class="top-0 right-0 absolute bg-white/5 rounded-full w-72 h-72 -translate-y-1/2 translate-x-1/3"></div>
+      <div class="bottom-0 left-0 absolute bg-white/5 rounded-full w-48 h-48 -translate-x-1/4 translate-y-1/3"></div>
+      <div class="z-10 relative mx-auto px-5 max-w-3xl text-white text-center">
+        <h2 class="mb-4 font-extrabold text-3xl md:text-4xl">تبرعك يصنع الفارق</h2>
+        <p class="mb-8 text-white/80 text-lg leading-relaxed">كل ريال تتبرع به يُحوَّل مباشرةً إلى مأوى، غذاء، ورعاية صحية لعائلة نازحة في غزة.</p>
+      </div>
+    </section>
+
+    <!-- ── 7. CHILD SECTION ─────────────────────────────────────────────────── -->
+    <section class="bg-white py-16">
+      <div class="mx-auto px-5 max-w-6xl">
+        <div class="items-center gap-12 grid md:grid-cols-2">
+          <div class="order-2 md:order-1">
+            <span class="font-semibold text-primary text-sm">من وحي الواقع</span>
+            <h2 class="mt-2 mb-5 font-extrabold text-dark text-3xl md:text-4xl leading-snug">
+              رغم <span class="text-red-400">الألم</span>، هناك دائماً <span class="text-second">أمل</span> يستحق أن نصارع من أجله
+            </h2>
+            <p class="mb-7 text-gray-500 leading-relaxed">لأن كل طفل يستحق مستقبلاً مشرقاً بعيداً عن الألم والنزوح. بتبرعك اليوم، تمنح الأمل لآلاف الأطفال.</p>
+          </div>
+          <div class="order-1 md:order-2">
+            <div class="relative shadow-xl rounded-2xl overflow-hidden">
+              <img src="{% static 'camp/images/home-child.png' %}" alt="طفل فلسطيني" class="w-full h-96 object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% include "camp/partials/_footer.html" with year="2025" %}
+    <script src="{% static 'camp/js/camp.js' %}" defer></script>
+  </body>
+</html>
