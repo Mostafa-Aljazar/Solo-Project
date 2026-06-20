@@ -39,7 +39,30 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'login',
     'camp',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
+
+CKEDITOR_UPLOAD_PATH = 'ckeditor_uploads/'
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline', 'Strike'],
+            ['NumberedList', 'BulletedList', 'Blockquote'],
+            ['JustifyLeft', 'JustifyCenter', 'JustifyRight'],
+            ['Link', 'Unlink'],
+            ['Image', 'Table', 'HorizontalRule'],
+            ['Styles', 'Format', 'FontSize'],
+            ['RemoveFormat', 'Source'],
+        ],
+        'height': 400,
+        'width': '100%',
+        'extraPlugins': 'autogrow',
+        'language': 'ar',
+        'contentsLangDirection': 'rtl',
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

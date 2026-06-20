@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .models import HeroSlide, SiteStatistic, Service
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from .models import Article, HeroSlide, SiteStatistic, Service
 
 SERVICE_ICONS = {
     'tent':     '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M3.5 21L14 3"/><path d="M20.5 21L10 3"/><path d="M15.5 21L12 15l-3.5 6"/><path d="M2 21h20"/></svg>',
@@ -23,6 +24,66 @@ ISLAMIC_QUOTE = {
     'arabic': 'مَّثَلُ الَّذِينَ يُنفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنبَتَتْ سَبْعَ سَنَابِلَ فِي كُلِّ سُنبُلَةٍ مِّائَةُ حَبَّةٍ ۗ وَاللَّهُ يُضَاعِفُ لِمَن يَشَاءُ ۗ وَاللَّهُ وَاسِعٌ عَلِيمٌ',
     'source': 'سورة البقرة — الآية ٢٦١',
 }
+
+
+def blog_list(request):
+    qs = Article.objects.filter(content_type=Article.BLOG, is_published=True)
+    total_count = qs.count()
+    paginator = Paginator(qs, 9)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, 'camp/written_content_list.html', {
+        'page_obj': page_obj,
+        'total_count': total_count,
+        'page_title': 'المدونة',
+        'hero_tag': 'المحتوى',
+        'hero_desc': 'مقالات وأخبار ميدانية من قلب العمل الإنساني',
+        'count_label': f'{total_count} مقال',
+        'detail_url_name': 'blog_detail',
+        'empty_title': 'لا توجد مقالات بعد',
+        'empty_sub': 'ترقّب — سيتم نشر مقالات قريباً',
+    })
+
+
+def blog_detail(request, pk):
+    article = get_object_or_404(Article, pk=pk, content_type=Article.BLOG, is_published=True)
+    return render(request, 'camp/written_content_detail.html', {
+        'article': article,
+        'list_url': '/blog/',
+        'list_label': 'المدونة',
+        'badge_label': 'مقال',
+        'back_label': 'العودة إلى المدونة',
+        'is_story': False,
+    })
+
+
+def story_list(request):
+    qs = Article.objects.filter(content_type=Article.STORY, is_published=True)
+    total_count = qs.count()
+    paginator = Paginator(qs, 9)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, 'camp/written_content_list.html', {
+        'page_obj': page_obj,
+        'total_count': total_count,
+        'page_title': 'قصص النجاح',
+        'hero_tag': 'إلهام وأمل',
+        'hero_desc': 'قصص حقيقية لأشخاص حقيقيين استعادوا حياتهم بفضل دعمكم',
+        'count_label': f'{total_count} قصة',
+        'detail_url_name': 'story_detail',
+        'empty_title': 'لا توجد قصص بعد',
+        'empty_sub': 'ترقّب — سيتم نشر قصص ملهمة قريباً',
+    })
+
+
+def story_detail(request, pk):
+    article = get_object_or_404(Article, pk=pk, content_type=Article.STORY, is_published=True)
+    return render(request, 'camp/written_content_detail.html', {
+        'article': article,
+        'list_url': '/success-stories/',
+        'list_label': 'قصص النجاح',
+        'badge_label': 'قصة نجاح',
+        'back_label': 'العودة إلى قصص النجاح',
+        'is_story': True,
+    })
 
 
 def home(request):

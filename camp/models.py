@@ -1,4 +1,34 @@
 from django.db import models
+from django.utils import timezone
+from ckeditor_uploader.fields import RichTextUploadingField
+
+
+class Article(models.Model):
+    BLOG = 'blog'
+    STORY = 'story'
+    TYPE_CHOICES = [(BLOG, 'مقال'), (STORY, 'قصة نجاح')]
+
+    content_type = models.CharField(max_length=10, choices=TYPE_CHOICES, verbose_name='النوع')
+    title = models.CharField(max_length=300, verbose_name='العنوان')
+    brief = models.TextField(blank=True, verbose_name='مقدمة قصيرة')
+    content = RichTextUploadingField(verbose_name='المحتوى', blank=True)
+    cover_image = models.ImageField(upload_to='articles/', blank=True, null=True, verbose_name='صورة الغلاف')
+    reading_minutes = models.PositiveSmallIntegerField(default=3, verbose_name='وقت القراءة (دقائق)')
+    is_published = models.BooleanField(default=True, verbose_name='منشور')
+    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ النشر')
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'مقال / قصة'
+        verbose_name_plural = 'المقالات والقصص'
+
+    def __str__(self):
+        return self.title
+
+    def get_cover_image(self):
+        if self.cover_image:
+            return self.cover_image.url
+        return None
 
 
 class HeroSlide(models.Model):

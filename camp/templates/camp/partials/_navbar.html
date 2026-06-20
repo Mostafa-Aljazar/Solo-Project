@@ -17,6 +17,8 @@
     <div class="hidden md:flex items-center gap-6">
       <a href="/" class="navbar-link text-sm font-semibold text-gray-700 hover:text-primary">الرئيسية</a>
       <a href="/#our-service" class="navbar-link text-sm font-semibold text-gray-700 hover:text-primary">خدماتنا</a>
+      <a href="{% url 'blog_list' %}" class="navbar-link text-sm font-semibold text-gray-700 hover:text-primary">المدونة</a>
+      <a href="{% url 'story_list' %}" class="navbar-link text-sm font-semibold text-gray-700 hover:text-primary">قصص النجاح</a>
     </div>
 
     <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
@@ -29,5 +31,7 @@
   <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-5 py-4 space-y-3">
     <a href="/" class="block text-sm font-semibold text-gray-700 py-1">الرئيسية</a>
     <a href="/#our-service" class="block text-sm font-semibold text-gray-700 py-1">خدماتنا</a>
+    <a href="{% url 'blog_list' %}" class="block text-sm font-semibold text-gray-700 py-1">المدونة</a>
+    <a href="{% url 'story_list' %}" class="block text-sm font-semibold text-gray-700 py-1">قصص النجاح</a>
   </div>
 </nav>

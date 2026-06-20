@@ -1,0 +1,87 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ page_title }} — مخيم الأقصى</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: "#345e40", second: "#97a483", dark: "#2e2e2e" },
+          fontFamily: { cairo: ["Cairo", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="{% static 'camp/css/style.css' %}" />
+</head>
+<body class="font-cairo bg-[#f9f9f7]">
+  {% include "camp/partials/_navbar.html" %}
+
+  <!-- Hero -->
+  <div class="mt-16 bg-gradient-to-br from-primary to-[#1e3d26] text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none opacity-[.07]" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:32px 32px;"></div>
+    <div class="absolute -top-24 -start-24 w-80 h-80 rounded-full bg-white/5 pointer-events-none"></div>
+    <div class="absolute -bottom-16 -end-16 w-60 h-60 rounded-full bg-white/5 pointer-events-none"></div>
+    <div class="relative max-w-7xl mx-auto px-5 text-center">
+      <span class="inline-block bg-white/15 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4 border border-white/30">{{ hero_tag }}</span>
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4">{{ page_title }}</h1>
+      <p class="text-white/75 text-lg max-w-xl mx-auto">{{ hero_desc }}</p>
+      {% if total_count %}
+      <div class="mt-6 inline-flex items-center gap-2 bg-white/10 backdrop-blur px-4 py-2 rounded-full text-sm">
+        {{ count_label }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="max-w-7xl mx-auto px-5 py-14">
+    {% if page_obj.object_list %}
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
+      {% for article in page_obj.object_list %}
+        {% url detail_url_name article.pk as detail_url %}
+        {% include "camp/partials/_article_card.html" with article=article detail_url=detail_url %}
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-center gap-2 mt-12">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="page-btn active">{{ num }}</span>
+        {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+          <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-20 text-gray-400">
+      <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      <p class="text-xl font-semibold">{{ empty_title }}</p>
+      <p class="text-sm mt-2">{{ empty_sub }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% include "camp/partials/_footer.html" with year="2025" %}
+  <script src="{% static 'camp/js/camp.js' %}" defer></script>
+</body>
+</html>
