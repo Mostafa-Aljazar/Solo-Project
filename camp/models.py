@@ -71,6 +71,42 @@ class Donation(models.Model):
         return f'{label} — ${self.amount}'
 
 
+class ContactMessageManager(models.Manager):
+    def contact_validator(self, data):
+        errors = {}
+        if not data.get('name', '').strip():
+            errors['name'] = 'الاسم مطلوب'
+        email = data.get('email', '').strip()
+        if not email or '@' not in email:
+            errors['email'] = 'يرجى إدخال بريد إلكتروني صحيح'
+        if not data.get('phone', '').strip():
+            errors['phone'] = 'رقم الهاتف مطلوب'
+        if not data.get('subject', '').strip():
+            errors['subject'] = 'يرجى اختيار موضوع الرسالة'
+        if len(data.get('message', '').strip()) < 10:
+            errors['message'] = 'الرسالة يجب أن تكون 10 أحرف على الأقل'
+        return errors
+
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=200, verbose_name='الاسم')
+    email = models.EmailField(verbose_name='البريد الإلكتروني')
+    phone = models.CharField(max_length=30, blank=True, verbose_name='الهاتف')
+    subject = models.CharField(max_length=200, verbose_name='الموضوع')
+    message = models.TextField(verbose_name='الرسالة')
+    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإرسال')
+
+    objects = ContactMessageManager()
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'رسالة تواصل'
+        verbose_name_plural = 'رسائل التواصل'
+
+    def __str__(self):
+        return f'{self.name} — {self.subject}'
+
+
 class HeroSlide(models.Model):
     title = models.CharField(max_length=200, verbose_name='العنوان')
     description = models.TextField(verbose_name='الوصف')

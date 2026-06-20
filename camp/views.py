@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Article, Donation, HeroSlide, SiteStatistic, Service
+from .models import Article, Donation, ContactMessage, HeroSlide, SiteStatistic, Service
 
 SERVICE_ICONS = {
     'tent':     '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M3.5 21L14 3"/><path d="M20.5 21L10 3"/><path d="M15.5 21L12 15l-3.5 6"/><path d="M2 21h20"/></svg>',
@@ -87,6 +87,78 @@ def story_detail(request, pk):
     })
 
 
+CONTACT_INFO = [
+    {
+        'title': 'الموقع',
+        'value': 'قطاع غزة، فلسطين',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
+    },
+    {
+        'title': 'البريد الإلكتروني',
+        'value': 'info@alaqsacamp.org',
+        'sub': 'نرد خلال 24 ساعة',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    },
+    {
+        'title': 'الهاتف',
+        'value': '+970 000 000 000',
+        'sub': 'الأحد — الخميس  8ص - 4م',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.82 2 2 0 015 6.64h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L9.91 13a16 16 0 006.08 6.08l.36-.36a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 20.92z"/></svg>',
+    },
+    {
+        'title': 'ساعات العمل',
+        'value': '8:00 ص — 4:00 م',
+        'sub': 'الأحد إلى الخميس',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    },
+]
+
+SUBJECT_CHOICES = [
+    ('استفسار عام', 'استفسار عام'),
+    ('طلب تبرع', 'طلب تبرع'),
+    ('التطوع والمشاركة', 'التطوع والمشاركة'),
+    ('الإبلاغ عن مشكلة', 'الإبلاغ عن مشكلة'),
+    ('طلب شراكة', 'طلب شراكة'),
+    ('أخرى', 'أخرى'),
+]
+
+CONTACT_FAQS = [
+    {'q': 'كيف يمكنني التبرع للمخيم؟', 'a': 'يمكنك التبرع بسهولة عبر صفحة التبرع على موقعنا، واختيار المبلغ المناسب لك. جميع التبرعات تُستخدم مباشرةً لدعم النازحين.'},
+    {'q': 'هل يمكنني التطوع مع مخيم الأقصى؟', 'a': 'نعم، نرحب بكل متطوع! يمكنك التواصل معنا عبر نموذج التواصل وسنعود إليك بأقرب وقت ممكن.'},
+    {'q': 'كيف أعرف أن تبرعي وصل للمستفيدين؟', 'a': 'نرسل لك تأكيداً فورياً بالبريد الإلكتروني، كما ننشر تقارير دورية شفافة عن استخدام الأموال.'},
+    {'q': 'هل يمكنني زيارة المخيم بنفسي؟', 'a': 'نقدر اهتمامك الشخصي. يمكنك التواصل معنا لمعرفة إمكانية الزيارة بحسب الأوضاع الأمنية.'},
+    {'q': 'ما هي الخدمات التي يقدمها المخيم؟', 'a': 'نقدم خدمات الإيواء، الغذاء والمياه، الرعاية الصحية، الدعم النفسي، التعليم، وخدمات الطوارئ.'},
+    {'q': 'هل تقبلون التبرعات العينية؟', 'a': 'نقبل بعض التبرعات العينية. تواصل معنا أولاً لمعرفة ما نحتاجه تحديداً وكيفية إيصاله.'},
+    {'q': 'ما مدى أمان بياناتي الشخصية؟', 'a': 'نلتزم بحماية بياناتك الشخصية بشكل كامل ولن نشاركها مع أي طرف ثالث.'},
+    {'q': 'كم مدة الاستجابة لرسائل التواصل؟', 'a': 'نلتزم بالرد خلال 24 ساعة في أيام العمل (الأحد - الخميس).'},
+]
+
+
+def contact(request):
+    errors = {}
+    form_data = {}
+    if request.method == 'POST':
+        form_data = request.POST
+        errors = ContactMessage.objects.contact_validator(request.POST)
+        if not errors:
+            ContactMessage.objects.create(
+                name=request.POST.get('name', '').strip(),
+                email=request.POST.get('email', '').strip(),
+                phone=request.POST.get('phone', '').strip(),
+                subject=request.POST.get('subject', '').strip(),
+                message=request.POST.get('message', '').strip(),
+            )
+            messages.success(request, 'وصلت رسالتك — سنرد عليك خلال 24 ساعة في أيام العمل.')
+            return redirect('contact')
+    return render(request, 'camp/contact.html', {
+        'errors': errors,
+        'form_data': form_data,
+        'contact_info': CONTACT_INFO,
+        'subject_choices': SUBJECT_CHOICES,
+        'faqs': CONTACT_FAQS,
+    })
+
+
 DONATE_FAQS = [
     {'q': 'هل تبرعي آمن وسري تماماً؟', 'a': 'نعم، نلتزم بسياسة خصوصية صارمة. بياناتك لا تُشارك مع أي طرف ثالث.'},
     {'q': 'كيف سأعرف أين ذهب تبرعي؟', 'a': 'نرسل لك تأكيداً فورياً لكل تبرع، ونصدر تقارير شفافية دورية.'},
@@ -144,7 +216,7 @@ def donate(request):
                 is_anonymous=is_anonymous,
                 story=story,
             )
-            messages.success(request, 'شكراً لتبرعك الكريم! تم تسجيل تبرعك بنجاح.')
+            messages.success(request, 'شكراً لتبرعك الكريم — تم تسجيل تبرعك وسيصل أثره مباشرةً.')
             return redirect('/donate/')
 
     return render(request, 'camp/donate.html', {

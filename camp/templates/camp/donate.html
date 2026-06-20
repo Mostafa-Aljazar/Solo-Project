@@ -57,12 +57,7 @@
 
     <div class="mx-auto px-[5%] xl:px-[10%] py-14 max-w-7xl">
       {% if messages %}{% for message in messages %}
-      <div
-        data-toast
-        data-type="{% if message.tags == 'error' %}error{% else %}success{% endif %}"
-      >
-        {{ message }}
-      </div>
+      <div data-toast data-type="{% if message.tags == 'error' %}error{% else %}success{% endif %}" style="display:none;">{{ message }}</div>
       {% endfor %}{% endif %}
 
       <div class="gap-10 grid lg:grid-cols-3">
@@ -320,10 +315,11 @@
     <!-- Toast container -->
     <div
       id="toast-container"
-      class="top-20 left-1/2 z-9999 fixed flex flex-col items-center gap-3 -translate-x-1/2 pointer-events-none"
+      class="top-20 left-1/2 fixed flex flex-col items-center gap-3 -translate-x-1/2 pointer-events-none"
+      style="z-index:9999;"
     ></div>
 
     {% include "camp/partials/_footer.html" %}
-    <script src="{% static 'camp/js/camp.js' %}" defer></script>
+    <script src="{% static 'camp/js/camp.js' %}"></script>
   </body>
 </html>
