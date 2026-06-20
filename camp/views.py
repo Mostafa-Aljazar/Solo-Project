@@ -365,6 +365,8 @@ def home(request):
     services = list(Service.objects.filter(is_active=True))
     for svc in services:
         svc.icon_svg = SERVICE_ICONS.get(svc.icon_name, SERVICE_ICONS['default'])
+    for stat in statistics:
+        stat.icon_svg = SERVICE_ICONS.get(stat.icon_name, SERVICE_ICONS['default'])
     return render(request, 'camp/home.html', {
         'hero_slides': hero_slides,
         'statistics': statistics,
