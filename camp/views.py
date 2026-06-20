@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 from django.core.paginator import Paginator
 from .models import Article, Donation, ContactMessage, HeroSlide, SiteStatistic, Service
 
@@ -141,13 +143,140 @@ def contact(request):
         form_data = request.POST
         errors = ContactMessage.objects.contact_validator(request.POST)
         if not errors:
+            name    = request.POST.get('name', '').strip()
+            email   = request.POST.get('email', '').strip()
+            phone   = request.POST.get('phone', '').strip()
+            subject = request.POST.get('subject', '').strip()
+            message = request.POST.get('message', '').strip()
+
             ContactMessage.objects.create(
-                name=request.POST.get('name', '').strip(),
-                email=request.POST.get('email', '').strip(),
-                phone=request.POST.get('phone', '').strip(),
-                subject=request.POST.get('subject', '').strip(),
-                message=request.POST.get('message', '').strip(),
+                name=name, email=email, phone=phone,
+                subject=subject, message=message,
             )
+
+            from datetime import date
+            plain_text = (
+                f'الاسم: {name}\n'
+                f'البريد: {email}\n'
+                f'الهاتف: {phone}\n'
+                f'الموضوع: {subject}\n\n'
+                f'الرسالة:\n{message}'
+            )
+            from datetime import datetime
+            received_at = datetime.now().strftime('%Y-%m-%d  %H:%M')
+            html_content = f"""
+<!DOCTYPE html>
+<html lang="ar">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:40px 16px;background:#eef0ee;font-family:Arial,sans-serif;direction:rtl;color:#1a1a1a;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:4px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+  <!-- Letterhead -->
+  <tr>
+    <td style="background:#345e40;padding:22px 32px;border-bottom:4px solid #2a4d33;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="color:#ffffff;">
+          <p style="margin:0;font-size:19px;font-weight:700;letter-spacing:0.3px;">مخيم الأقصى</p>
+          <p style="margin:3px 0 0;font-size:11px;color:rgba(255,255,255,0.6);">Al-Aqsa Camp — Humanitarian Relief Organization</p>
+        </td>
+        <td style="text-align:left;color:rgba(255,255,255,0.6);font-size:11px;white-space:nowrap;vertical-align:middle;">
+          <p style="margin:0;">info@alaqsacamp.org</p>
+          <p style="margin:3px 0 0;">Gaza, Palestine</p>
+        </td>
+      </tr></table>
+    </td>
+  </tr>
+
+  <!-- Document title -->
+  <tr>
+    <td style="padding:24px 32px 16px;">
+      <p style="margin:0 0 4px;font-size:11px;color:#999999;letter-spacing:1px;">إشعار رسمي — نموذج التواصل</p>
+      <h2 style="margin:0;font-size:17px;color:#1a1a1a;font-weight:700;">طلب تواصل جديد: {subject}</h2>
+    </td>
+  </tr>
+
+  <!-- Metadata bar -->
+  <tr>
+    <td style="padding:10px 32px;background:#f5f7f5;border-top:1px solid #e8ece8;border-bottom:1px solid #e8ece8;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="font-size:12px;color:#666666;"><strong>تاريخ الاستلام:</strong> {received_at}</td>
+        <td style="font-size:12px;color:#666666;text-align:left;"><strong>المصدر:</strong> {request.build_absolute_uri('/contact-us/')}</td>
+      </tr></table>
+    </td>
+  </tr>
+
+  <!-- Sender details -->
+  <tr>
+    <td style="padding:24px 32px 0;">
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;color:#345e40;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;border-bottom:2px solid #345e40;display:inline-block;">بيانات المُرسِل</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e0e6e0;border-collapse:collapse;border-radius:4px;">
+        <tr>
+          <td style="padding:11px 16px;font-size:12px;color:#666666;font-weight:700;border-bottom:1px solid #e8ece8;background:#f5f7f5;width:130px;">الاسم الكامل</td>
+          <td style="padding:11px 16px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #e8ece8;">{name}</td>
+        </tr>
+        <tr>
+          <td style="padding:11px 16px;font-size:12px;color:#666666;font-weight:700;border-bottom:1px solid #e8ece8;background:#f5f7f5;">البريد الإلكتروني</td>
+          <td style="padding:11px 16px;font-size:13px;border-bottom:1px solid #e8ece8;"><a href="mailto:{email}" style="color:#345e40;text-decoration:none;font-weight:600;">{email}</a></td>
+        </tr>
+        <tr>
+          <td style="padding:11px 16px;font-size:12px;color:#666666;font-weight:700;border-bottom:1px solid #e8ece8;background:#f5f7f5;">رقم الهاتف</td>
+          <td style="padding:11px 16px;font-size:13px;color:#1a1a1a;border-bottom:1px solid #e8ece8;">{phone or '—'}</td>
+        </tr>
+        <tr>
+          <td style="padding:11px 16px;font-size:12px;color:#666666;font-weight:700;background:#f5f7f5;">موضوع الرسالة</td>
+          <td style="padding:11px 16px;font-size:13px;color:#1a1a1a;">{subject}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- Message body -->
+  <tr>
+    <td style="padding:24px 32px 0;">
+      <p style="margin:0 0 12px;font-size:11px;font-weight:700;color:#345e40;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;border-bottom:2px solid #345e40;display:inline-block;">نص الرسالة</p>
+      <div style="border:1px solid #e0e6e0;border-right:3px solid #345e40;padding:18px 20px;background:#f9fbf9;font-size:14px;line-height:2;color:#2e2e2e;border-radius:0 4px 4px 0;">
+        {message}
+      </div>
+    </td>
+  </tr>
+
+  <!-- Action -->
+  <tr>
+    <td style="padding:24px 32px 28px;">
+      <p style="margin:0 0 12px;font-size:12px;color:#777777;">للرد المباشر على هذه الرسالة:</p>
+      <a href="mailto:{email}?subject=رد رسمي: {subject}"
+         style="display:inline-block;background:#345e40;color:#ffffff;text-decoration:none;
+                font-size:13px;font-weight:700;padding:11px 28px;border-radius:4px;">
+        الرد على المُرسِل
+      </a>
+    </td>
+  </tr>
+
+  <!-- Footer -->
+  <tr>
+    <td style="background:#2a2a2a;padding:14px 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="color:#888888;font-size:11px;">© {date.today().year} مخيم الأقصى — جميع الحقوق محفوظة</td>
+        <td style="color:#666666;font-size:11px;text-align:left;">هذا بريد آلي — لا تُرسِل رداً على هذا العنوان</td>
+      </tr></table>
+    </td>
+  </tr>
+
+</table>
+</td></tr></table>
+</body>
+</html>
+"""
+            msg = EmailMultiAlternatives(
+                subject=f'[مخيم الأقصى] رسالة جديدة: {subject}',
+                body=plain_text,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[settings.CONTACT_EMAIL],
+            )
+            msg.attach_alternative(html_content, 'text/html')
+            msg.send(fail_silently=True)
+
             messages.success(request, 'وصلت رسالتك — سنرد عليك خلال 24 ساعة في أيام العمل.')
             return redirect('contact')
     return render(request, 'camp/contact.html', {
