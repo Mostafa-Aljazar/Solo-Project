@@ -35,6 +35,7 @@
           <li><a href="/#our-service" class="hover:text-white transition-colors">خدماتنا</a></li>
           <li><a href="{% url 'blog_list' %}" class="hover:text-white transition-colors">المدونة</a></li>
           <li><a href="{% url 'story_list' %}" class="hover:text-white transition-colors">قصص النجاح</a></li>
+          <li><a href="{% url 'donate' %}" class="hover:text-white transition-colors">تبرع الآن</a></li>
         </ul>
       </div>
 
@@ -58,7 +59,7 @@
     </div>
 
     <div class="pt-6 text-center text-white/40 text-xs">
-      © {{ year|default:"2025" }} مخيم الأقصى — جميع الحقوق محفوظة
+      © {% now "Y" %} مخيم الأقصى — جميع الحقوق محفوظة
     </div>
   </div>
 </footer>

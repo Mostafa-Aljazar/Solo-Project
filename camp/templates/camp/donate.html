@@ -1,0 +1,329 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تبرع الآن — مخيم الأقصى</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#345e40", second: "#97a483", dark: "#2e2e2e" },
+            fontFamily: { cairo: ["Cairo", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="{% static 'camp/css/style.css' %}" />
+  </head>
+  <body class="bg-[#f9f9f7] font-cairo">
+    {% include "camp/partials/_navbar.html" %}
+
+    <!-- Hero -->
+    <div
+      class="relative bg-gradient-to-br from-primary to-[#1e3d26] mt-16 py-20 overflow-hidden text-white"
+    >
+      <div
+        class="absolute inset-0 opacity-[.07] pointer-events-none"
+        style="
+          background-image: radial-gradient(circle, #fff 1px, transparent 1px);
+          background-size: 32px 32px;
+        "
+      ></div>
+      <div
+        class="-top-24 absolute bg-white/5 rounded-full w-80 h-80 pointer-events-none -start-24"
+      ></div>
+      <div
+        class="-bottom-16 absolute bg-white/5 rounded-full w-60 h-60 pointer-events-none -end-16"
+      ></div>
+      <div class="relative mx-auto px-5 max-w-7xl text-center">
+        <span
+          class="inline-block bg-white/15 mb-4 px-3 py-1 border border-white/30 rounded-full font-semibold text-white text-xs"
+          >أثّر إيجابياً</span
+        >
+        <h1 class="mb-4 font-extrabold text-4xl md:text-5xl">تبرع الآن</h1>
+        <p class="mx-auto max-w-xl text-white/75 text-lg">
+          كل دولار يصل مباشرةً إلى عائلة نازحة في قطاع غزة
+        </p>
+      </div>
+    </div>
+
+    <div class="mx-auto px-[5%] xl:px-[10%] py-14 max-w-7xl">
+      {% if messages %}{% for message in messages %}
+      <div
+        data-toast
+        data-type="{% if message.tags == 'error' %}error{% else %}success{% endif %}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %}{% endif %}
+
+      <div class="gap-10 grid lg:grid-cols-3">
+        <!-- Donation Form (2/3) -->
+        <div class="lg:col-span-2">
+          <div
+            class="bg-white shadow-sm p-8 border border-gray-100 rounded-2xl"
+          >
+            <h2 class="mb-6 font-bold text-dark text-2xl">تفاصيل تبرعك</h2>
+
+            {% if story %}
+            <div
+              class="flex items-start gap-3 bg-second/15 mb-6 p-4 border border-second/30 rounded-xl"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="flex-shrink-0 mt-0.5 w-5 h-5 text-primary"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                />
+              </svg>
+              <div>
+                <div class="font-semibold text-dark text-sm">
+                  تبرع لدعم هذه القصة
+                </div>
+                <div class="mt-0.5 text-gray-500 text-xs">
+                  {{ story_title }}
+                </div>
+                <a
+                  href="/success-stories/{{ story.pk }}/"
+                  class="block mt-1 text-primary text-xs hover:underline"
+                  >← العودة إلى القصة</a
+                >
+              </div>
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate class="space-y-5">
+              {% csrf_token %}
+
+              <!-- Amount -->
+              <div>
+                <label class="block mb-2 font-semibold text-dark text-sm"
+                  >مبلغ التبرع (دولار أمريكي)
+                  <span class="text-red-500">*</span></label
+                >
+                <div class="flex flex-wrap gap-2 mb-3">
+                  {% for amt in quick_amounts %}
+                  <button
+                    type="button"
+                    onclick="setAmount({{ amt }})"
+                    class="px-4 py-1.5 border border-gray-200 hover:border-primary rounded-full font-semibold hover:text-primary text-sm transition-colors quick-amt"
+                    dir="ltr"
+                  >
+                    ${{ amt }}
+                  </button>
+                  {% endfor %}
+                </div>
+                <div class="relative">
+                  <span
+                    class="top-1/2 left-4 absolute font-bold text-gray-400 text-sm -translate-y-1/2"
+                    >$</span
+                  >
+                  <input
+                    type="number"
+                    name="amount"
+                    id="id_amount"
+                    value="{{ form_data.amount|default:'' }}"
+                    placeholder="50"
+                    min="1"
+                    step="0.01"
+                    class="w-full border {% if errors.amount %}border-red-400{% else %}border-gray-200{% endif %} rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+                    dir="ltr"
+                  />
+                </div>
+                {% if errors.amount %}<span
+                  class="block mt-1 text-red-500 text-xs"
+                  >{{ errors.amount }}</span
+                >{% endif %}
+              </div>
+
+              <!-- Anonymous Toggle -->
+              <div
+                class="flex items-center gap-3 bg-gray-50 p-4 border border-gray-100 rounded-xl"
+              >
+                <input
+                  type="checkbox"
+                  name="is_anonymous"
+                  id="id_is_anonymous"
+                  {% if form_data.is_anonymous == 'on' %}checked{% endif %}
+                  class="w-4 h-4 accent-primary cursor-pointer"
+                />
+                <label
+                  for="id_is_anonymous"
+                  class="font-medium text-dark text-sm cursor-pointer select-none"
+                >
+                  تبرع مجهول الهوية (لن يظهر اسمك أو بريدك)
+                </label>
+              </div>
+
+              <!-- Personal Fields -->
+              <div id="personal-fields" class="space-y-4">
+                <div class="gap-4 grid sm:grid-cols-2">
+                  <div>
+                    <label class="block mb-1.5 font-semibold text-dark text-sm"
+                      >الاسم الكامل</label
+                    >
+                    <input
+                      type="text"
+                      name="name"
+                      value="{{ form_data.name|default:'' }}"
+                      placeholder="محمد أحمد"
+                      class="w-full border {% if errors.name %}border-red-400{% else %}border-gray-200{% endif %} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+                    />
+                    {% if errors.name %}<span
+                      class="block mt-1 text-red-500 text-xs"
+                      >{{ errors.name }}</span
+                    >{% endif %}
+                  </div>
+                  <div>
+                    <label class="block mb-1.5 font-semibold text-dark text-sm"
+                      >البريد الإلكتروني</label
+                    >
+                    <input
+                      type="email"
+                      name="email"
+                      value="{{ form_data.email|default:'' }}"
+                      placeholder="example@email.com"
+                      dir="ltr"
+                      class="w-full border {% if errors.email %}border-red-400{% else %}border-gray-200{% endif %} rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+                    />
+                    {% if errors.email %}<span
+                      class="block mt-1 text-red-500 text-xs"
+                      >{{ errors.email }}</span
+                    >{% endif %}
+                  </div>
+                </div>
+                <div>
+                  <label class="block mb-1.5 font-semibold text-dark text-sm"
+                    >رسالة شخصية
+                    <span class="font-normal text-gray-400"
+                      >(اختياري)</span
+                    ></label
+                  >
+                  <textarea
+                    name="message"
+                    rows="3"
+                    placeholder="شاركنا دافعك للتبرع..."
+                    class="px-4 py-3 border border-gray-200 focus:border-primary rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 w-full text-sm transition resize-none"
+                  >
+{{ form_data.message|default:'' }}</textarea
+                  >
+                </div>
+              </div>
+
+              <!-- Trust Badge -->
+              <div
+                class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl text-gray-400 text-xs"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="flex-shrink-0 w-4 h-4 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                معاملتك آمنة ومشفرة تماماً — بياناتك لن تُشارك مع أي طرف ثالث
+              </div>
+
+              <button
+                type="submit"
+                class="flex justify-center items-center gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 py-4 rounded-xl w-full font-bold text-white text-base transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+                تبرع الآن
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-5">
+          <!-- Impact breakdown -->
+          <div
+            class="bg-white shadow-sm p-6 border border-gray-100 rounded-2xl"
+          >
+            <h3 class="mb-4 font-bold text-dark">أين يذهب تبرعك؟</h3>
+            <div class="space-y-3">
+              {% for item in impact %}
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex flex-shrink-0 justify-center items-center bg-primary/10 rounded-lg w-9 h-9"
+                >
+                  {{ item.icon|safe }}
+                </div>
+                <div>
+                  <div class="font-semibold text-dark text-sm">
+                    {{ item.label }}
+                  </div>
+                  <div class="text-gray-400 text-xs">{{ item.desc }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- FAQ -->
+          <div
+            class="bg-white shadow-sm p-6 border border-gray-100 rounded-2xl"
+          >
+            <h3 class="mb-4 font-bold text-dark">أسئلة شائعة</h3>
+            <div class="space-y-2">
+              {% for faq in faqs %}
+              <details
+                class="border border-gray-100 rounded-xl overflow-hidden text-sm faq-item"
+              >
+                <summary class="!px-4 !py-3 text-xs">
+                  <span>{{ faq.q }}</span>
+                  <svg
+                    class="flex-shrink-0 w-4 h-4 text-primary faq-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </summary>
+                <div class="!text-xs faq-body">{{ faq.a }}</div>
+              </details>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div
+      id="toast-container"
+      class="top-20 left-1/2 z-9999 fixed flex flex-col items-center gap-3 -translate-x-1/2 pointer-events-none"
+    ></div>
+
+    {% include "camp/partials/_footer.html" %}
+    <script src="{% static 'camp/js/camp.js' %}" defer></script>
+  </body>
+</html>

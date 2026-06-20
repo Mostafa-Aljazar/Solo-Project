@@ -1,6 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Article, HeroSlide, SiteStatistic, Service
+from .models import Article, Donation, HeroSlide, SiteStatistic, Service
 
 SERVICE_ICONS = {
     'tent':     '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path d="M3.5 21L14 3"/><path d="M20.5 21L10 3"/><path d="M15.5 21L12 15l-3.5 6"/><path d="M2 21h20"/></svg>',
@@ -83,6 +84,77 @@ def story_detail(request, pk):
         'badge_label': 'قصة نجاح',
         'back_label': 'العودة إلى قصص النجاح',
         'is_story': True,
+    })
+
+
+DONATE_FAQS = [
+    {'q': 'هل تبرعي آمن وسري تماماً؟', 'a': 'نعم، نلتزم بسياسة خصوصية صارمة. بياناتك لا تُشارك مع أي طرف ثالث.'},
+    {'q': 'كيف سأعرف أين ذهب تبرعي؟', 'a': 'نرسل لك تأكيداً فورياً لكل تبرع، ونصدر تقارير شفافية دورية.'},
+    {'q': 'هل يمكنني تبرع مبلغ محدد حسب اختياري؟', 'a': 'بالتأكيد! يمكنك إدخال أي مبلغ يناسبك ابتداءً من دولار واحد.'},
+    {'q': 'ماذا لو كنت خارج البلد؟', 'a': 'يمكن التبرع من أي مكان في العالم. المبلغ يُحول بالدولار الأمريكي.'},
+]
+
+DONATE_IMPACT = [
+    {
+        'label': 'الإيواء',
+        'desc': 'توفير خيام وملاجئ آمنة',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3.5 21L14 3"/><path d="M20.5 21L10 3"/><path d="M15.5 21L12 15l-3.5 6"/><path d="M2 21h20"/></svg>',
+    },
+    {
+        'label': 'الغذاء',
+        'desc': 'وجبات يومية للعائلات',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M12 6.528V3a1 1 0 0 1 1-1"/><path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21"/></svg>',
+    },
+    {
+        'label': 'الصحة',
+        'desc': 'رعاية طبية ودوائية',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/></svg>',
+    },
+    {
+        'label': 'التعليم',
+        'desc': 'فصول دراسية للأطفال',
+        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>',
+    },
+]
+
+
+def donate(request):
+    story_id = request.GET.get('story')
+    story_title = request.GET.get('title', '')[:200].strip()
+    story = None
+    if story_id:
+        story = Article.objects.filter(
+            pk=story_id, content_type=Article.STORY, is_published=True
+        ).first()
+        if story and not story_title:
+            story_title = story.title
+
+    errors = {}
+    form_data = {}
+    if request.method == 'POST':
+        form_data = request.POST
+        errors = Donation.objects.donation_validator(request.POST)
+        if not errors:
+            is_anonymous = request.POST.get('is_anonymous') == 'on'
+            Donation.objects.create(
+                amount=float(request.POST.get('amount', 0)),
+                name='متبرع مجهول' if is_anonymous else request.POST.get('name', '').strip(),
+                email='' if is_anonymous else request.POST.get('email', '').strip(),
+                message='' if is_anonymous else request.POST.get('message', '').strip(),
+                is_anonymous=is_anonymous,
+                story=story,
+            )
+            messages.success(request, 'شكراً لتبرعك الكريم! تم تسجيل تبرعك بنجاح.')
+            return redirect('/donate/')
+
+    return render(request, 'camp/donate.html', {
+        'errors': errors,
+        'form_data': form_data,
+        'story': story,
+        'story_title': story_title,
+        'faqs': DONATE_FAQS,
+        'impact': DONATE_IMPACT,
+        'quick_amounts': [10, 25, 50, 100, 250],
     })
 
 

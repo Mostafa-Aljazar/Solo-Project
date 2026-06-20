@@ -31,6 +31,46 @@ class Article(models.Model):
         return None
 
 
+class DonationManager(models.Manager):
+    def donation_validator(self, data):
+        errors = {}
+        try:
+            amount = float(data.get('amount', 0))
+            if amount < 1:
+                errors['amount'] = 'الحد الأدنى للتبرع دولار واحد'
+        except (ValueError, TypeError):
+            errors['amount'] = 'يرجى إدخال مبلغ صحيح'
+        is_anonymous = data.get('is_anonymous') == 'on'
+        if not is_anonymous:
+            if not data.get('name', '').strip():
+                errors['name'] = 'الاسم مطلوب'
+            email = data.get('email', '').strip()
+            if not email or '@' not in email:
+                errors['email'] = 'يرجى إدخال بريد إلكتروني صحيح'
+        return errors
+
+
+class Donation(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='المبلغ')
+    name = models.CharField(max_length=200, blank=True, verbose_name='الاسم')
+    email = models.EmailField(blank=True, verbose_name='البريد الإلكتروني')
+    message = models.TextField(blank=True, verbose_name='الرسالة')
+    is_anonymous = models.BooleanField(default=False, verbose_name='مجهول الهوية')
+    story = models.ForeignKey('Article', null=True, blank=True, on_delete=models.SET_NULL, verbose_name='قصة مرتبطة')
+    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ التبرع')
+
+    objects = DonationManager()
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'تبرع'
+        verbose_name_plural = 'التبرعات'
+
+    def __str__(self):
+        label = 'مجهول' if self.is_anonymous else self.name
+        return f'{label} — ${self.amount}'
+
+
 class HeroSlide(models.Model):
     title = models.CharField(max_length=200, verbose_name='العنوان')
     description = models.TextField(verbose_name='الوصف')
