@@ -10,12 +10,12 @@
     <meta property="og:site_name" content="مخيم الأقصى" />
     <meta property="og:title" content="مخيم الأقصى — الصفحة الرئيسية" />
     <meta property="og:description" content="مخيم الأقصى — منظمة إنسانية تقدم المساعدات للنازحين في غزة من مأوى وغذاء ورعاية صحية وتعليم." />
-    <meta property="og:image" content="{% static 'camp/images/logo.png' %}" />
-    <meta property="og:url" content="https://mostafa2003.pythonanywhere.com/" />
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'camp/images/logo.png' %}" />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="مخيم الأقصى — الصفحة الرئيسية" />
     <meta name="twitter:description" content="مخيم الأقصى — منظمة إنسانية تقدم المساعدات للنازحين في غزة." />
-    <meta name="twitter:image" content="{% static 'camp/images/logo.png' %}" />
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'camp/images/logo.png' %}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"

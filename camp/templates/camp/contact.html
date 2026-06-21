@@ -8,10 +8,10 @@
   <meta name="description" content="تواصل مع مخيم الأقصى — نرد خلال 24 ساعة." />
   <meta property="og:title" content="تواصل معنا — مخيم الأقصى" />
   <meta property="og:description" content="تواصل مع فريق مخيم الأقصى الإنساني." />
-  <meta property="og:image" content="{% static 'camp/images/logo.png' %}" />
-  <meta property="og:url" content="https://mostafa2003.pythonanywhere.com/contact-us/" />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'camp/images/logo.png' %}" />
+  <meta property="og:url" content="{{ request.build_absolute_uri }}" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:image" content="{% static 'camp/images/logo.png' %}" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'camp/images/logo.png' %}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>

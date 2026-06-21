@@ -8,9 +8,10 @@
   <meta name="description" content="{{ article.brief|truncatechars:160 }}" />
   <meta property="og:title" content="{{ article.title }} — مخيم الأقصى" />
   <meta property="og:description" content="{{ article.brief|truncatechars:160 }}" />
-  <meta property="og:image" content="{% if article.cover_image %}{{ article.cover_image.url }}{% else %}{% static 'camp/images/logo.png' %}{% endif %}" />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% if article.cover_image %}{{ article.cover_image.url }}{% else %}{% static 'camp/images/logo.png' %}{% endif %}" />
+  <meta property="og:url" content="{{ request.build_absolute_uri }}" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="{% if article.cover_image %}{{ article.cover_image.url }}{% else %}{% static 'camp/images/logo.png' %}{% endif %}" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% if article.cover_image %}{{ article.cover_image.url }}{% else %}{% static 'camp/images/logo.png' %}{% endif %}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
