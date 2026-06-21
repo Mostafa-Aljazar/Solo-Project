@@ -359,8 +359,31 @@ def donate(request):
     })
 
 
+DEFAULT_HERO_SLIDES = [
+    {
+        'tag': 'إغاثة إنسانية',
+        'title': 'معاً نبني الأمل لأهل غزة',
+        'description': 'مخيم الأقصى يعمل على تقديم المساعدات الإنسانية العاجلة للنازحين في قطاع غزة من مأوى وغذاء ورعاية صحية.',
+        'image_static': 'camp/images/hero-default.jpg',
+    },
+    {
+        'tag': 'مساعدات غذائية',
+        'title': 'لا يجوع أحد وبإمكاننا المساعدة',
+        'description': 'نوزع الوجبات الساخنة والحصص الغذائية يومياً على آلاف العائلات النازحة داخل المخيم.',
+        'image_static': 'camp/images/hero-default.jpg',
+    },
+    {
+        'tag': 'رعاية الأطفال',
+        'title': 'كل طفل يستحق مستقبلاً أفضل',
+        'description': 'نوفر بيئة آمنة وتعليماً مستمراً لأطفال المخيم حتى لا تتوقف مسيرتهم رغم الظروف الصعبة.',
+        'image_static': 'camp/images/hero-default.jpg',
+    },
+]
+
+
 def home(request):
     hero_slides = list(HeroSlide.objects.filter(is_active=True)[:3])
+    use_default_hero = len(hero_slides) == 0
     statistics = list(SiteStatistic.objects.all()[:4])
     services = list(Service.objects.filter(is_active=True))
     for svc in services:
@@ -369,6 +392,7 @@ def home(request):
         stat.icon_svg = SERVICE_ICONS.get(stat.icon_name, SERVICE_ICONS['default'])
     return render(request, 'camp/home.html', {
         'hero_slides': hero_slides,
+        'default_hero_slides': DEFAULT_HERO_SLIDES if use_default_hero else [],
         'statistics': statistics,
         'services': services,
         'mission_values': MISSION_VALUES,

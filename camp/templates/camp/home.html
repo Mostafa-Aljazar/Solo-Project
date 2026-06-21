@@ -60,6 +60,38 @@
         </div>
       </div>
       {% endfor %}
+      {% for slide in default_hero_slides %}
+      <div class="bg-black hero-slide {% if forloop.first %}active{% endif %}">
+        <img
+          src="{% static slide.image_static %}"
+          alt="{{ slide.title }}"
+          class="absolute inset-0 opacity-60 w-full h-full object-cover"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-l from-black/70 via-black/30 to-transparent"
+        ></div>
+        <div
+          class="z-10 relative flex items-center mx-auto px-5 max-w-7xl h-full"
+        >
+          <div class="max-w-xl text-white fade-in-up">
+            {% if slide.tag %}
+            <span
+              class="inline-block bg-white/20 backdrop-blur mb-4 px-3 py-1 border border-white/30 rounded-full font-semibold text-white text-xs"
+              >{{ slide.tag }}</span
+            >
+            {% endif %}
+            <h1
+              class="mb-5 font-extrabold text-4xl md:text-5xl lg:text-6xl leading-tight"
+            >
+              {{ slide.title }}
+            </h1>
+            <p class="mb-8 text-white/80 text-base md:text-lg leading-relaxed">
+              {{ slide.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
 
       <button
         id="hero-prev"
